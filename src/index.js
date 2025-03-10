@@ -20,7 +20,7 @@ app.use(cookieParser());
 
 const corsOptions = {
     origin: process.env.ORIGIN, // Allow only your frontend
-    methods: "GET,POST,PUT,DELETE",
+    methods: "GET,POST,PUT,DELETE,PATCH",
     allowedHeaders: "Content-Type,Authorization",
     credentials: true, // Allow cookies if needed
 };
