@@ -10,29 +10,32 @@ import cookieParser from "cookie-parser";
 import { testTMDB } from "./lib/tmdb.js";
 import cors from "cors";
 
+import passport from "passport";
+import session from "express-session";
+import "./lib/passport.js"; 
+
 dotenv.config();
 const app = express();
 
 const PORT = process.env.PORT;
 
-app.use(express.json({limit: '50mb'}));
-
-app.use(express.urlencoded({limit: '50mb', extended: true}));
-
-app.use(express.json());
+app.use(express.json()); 
 app.use(cookieParser());
 
-const corsOptions = {
-    origin: process.env.ORIGIN, // Allow only your frontend
-    methods: "GET,POST,PUT,DELETE,PATCH",
-    allowedHeaders: "Content-Type,Authorization",
-    credentials: true, // Allow cookies if needed
-};
+app.use(cors({
+    origin: "http://localhost:5173",
+    credentials: true
+  }));
 
-app.use(cors(corsOptions));
+app.use(session({
+    secret: process.env.JWT_SECRET,
+    resave: false,
+    saveUninitialized: false,
+    cookie: {secure: false}
+}))
 
-// If using custom headers, explicitly allow preflight requests
-app.options("*", cors(corsOptions));
+app.use(passport.initialize());
+app.use(passport.session());
 
 app.use("/api/auth", authRoutes);
 app.use("/api/user", userRoutes);
@@ -41,11 +44,11 @@ app.use("/api/actions", actionRoutes);
 app.use("/api/page", pageRoutes);
 
 
-app.all("*", (req, res) => {
-    res.status(404).json({ message: "Route Not Found" });
+app.all("*",(req,res) => {
+    res.status(404).json({message: "Backend working"});
 });
 
-app.listen(PORT, () => {
+app.listen(PORT, ()=>{
     console.log("server is running on port PORT: " + PORT);
     connectDB();
     testTMDB();
